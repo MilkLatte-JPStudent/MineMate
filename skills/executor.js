@@ -1,11 +1,15 @@
 const vm = require('vm');
 const fs = require('fs');
 const path = require('path');
+const { validateCode } = require('./validator');
 
 async function executeSkillCode(bot, codeStr, aiUtils = {}) {
   // The JSON parsing already handles \n if it's properly escaped in JSON strings,
   // but if the user requested explicit '\n' literal replacement, we handle it.
   const actualCode = codeStr.replace(/\\n/g, '\n');
+  
+  // AST Validation for security
+  validateCode(actualCode);
   
   const mmskills = {
     move: {
