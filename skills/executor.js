@@ -1,15 +1,9 @@
-const vm = require('vm');
 const fs = require('fs');
 const path = require('path');
-const { validateCode } = require('./validator');
+const { Worker } = require('worker_threads');
 
 async function executeSkillCode(bot, codeStr, aiUtils = {}) {
-  // The JSON parsing already handles \n if it's properly escaped in JSON strings,
-  // but if the user requested explicit '\n' literal replacement, we handle it.
   const actualCode = codeStr.replace(/\\n/g, '\n');
-  
-  // AST Validation for security
-  validateCode(actualCode);
   
   const mmskills = {
     move: {
@@ -53,7 +47,6 @@ async function executeSkillCode(bot, codeStr, aiUtils = {}) {
         }
       },
       lookat: async (pitch, yaw) => {
-        // Mineflayer expects yaw first, then pitch
         await bot.look(yaw, pitch, true);
       },
       jump: () => {
@@ -150,33 +143,64 @@ async function executeSkillCode(bot, codeStr, aiUtils = {}) {
     }
   };
 
-  const context = {
-    bot: bot,
-    mmskills: mmskills,
-    console: console,
-    require: require,
-    setTimeout: setTimeout,
-    setInterval: setInterval,
-    clearInterval: clearInterval,
-    Promise: Promise
-  };
-  
-  vm.createContext(context);
-  
-  try {
-    const script = new vm.Script(`
-      (async () => {
-        ${actualCode}
-      })();
-    `);
-    const resultPromise = script.runInContext(context);
-    if (resultPromise && resultPromise.then) {
-      await resultPromise;
-    }
-  } catch (err) {
-    console.error("Skill error:", err);
-    throw err;
-  }
+  return new Promise((resolve, reject) => {
+    const worker = new Worker(path.join(__dirname, 'worker.js'), {
+      resourceLimits: { maxOldGenerationSizeMb: 50, maxYoungGenerationSizeMb: 10 }
+    });
+
+    worker.on('message', async (msg) => {
+      if (msg.type === 'call') {
+        try {
+          let result;
+          if (msg.target === 'mmskills') {
+            let fn = mmskills;
+            for (const p of msg.path) fn = fn[p];
+            result = await fn(...msg.args);
+          } else if (msg.target === 'bot') {
+            if (msg.isProperty) {
+              let val = bot;
+              for (const p of msg.path) val = val[p];
+              result = val;
+            } else {
+              let fn = bot;
+              let parent = bot;
+              for (let i = 0; i < msg.path.length; i++) {
+                if (i === msg.path.length - 1) parent = fn;
+                fn = fn[msg.path[i]];
+              }
+              result = await fn.apply(parent, msg.args);
+            }
+          } else if (msg.target === 'console') {
+            if (msg.path[0] === 'log') console.log('[Worker Log]', ...msg.args);
+            if (msg.path[0] === 'error') console.error('[Worker Error]', ...msg.args);
+          }
+          worker.postMessage({ type: 'response', id: msg.id, data: result });
+        } catch (err) {
+          worker.postMessage({ type: 'response', id: msg.id, error: err.message });
+        }
+      } else if (msg.type === 'done') {
+        worker.terminate();
+        resolve();
+      } else if (msg.type === 'error') {
+        worker.terminate();
+        reject(new Error(msg.error));
+      }
+    });
+
+    worker.on('error', (err) => {
+      reject(new Error(`Worker exception: ${err.message}`));
+    });
+
+    worker.on('exit', (code) => {
+      if (code !== 0) {
+        reject(new Error(`Worker stopped with exit code ${code} (possibly Memory Limit Exceeded)`));
+      } else {
+        resolve();
+      }
+    });
+
+    worker.postMessage({ type: 'run', code: actualCode });
+  });
 }
 
 module.exports = { executeSkillCode };

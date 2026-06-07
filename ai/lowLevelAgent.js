@@ -71,7 +71,7 @@ async function callLowLevelGemini(bot, frames) {
   const stateStr = `Coordinates: X=${pos.x.toFixed(2)}, Y=${pos.y.toFixed(2)}, Z=${pos.z.toFixed(2)}. Yaw=${yaw.toFixed(2)}, Pitch=${pitch.toFixed(2)}. [Script Running: ${isScriptRunning ? "YES" : "NO"}]`;
   
   const promptText = `You are MineMate, a Minecraft AI bot. You must respond in JSON matching the schema.
-If you have enough information to act, return Execute: 'Start' and write a complete, autonomous JavaScript script in 'Code'. You can use standard JS (loops, variables, conditionals) combined with 'mmskills' and 'bot' API to assemble a full processing sequence.
+If you have enough information to act, return Execute: 'Start' and write a complete, autonomous JavaScript script in 'Code'. You can use standard JS (loops, variables, conditionals) combined with 'mmskills' and 'botAPI' (for direct bot access like chat or control states) to assemble a full processing sequence.
 If you need to think deeply, plan, or use a skill tree/Google Search, return Execute: 'Thinking'.
 If you need to stop current actions, return Execute: 'Stop'.
 If a script is currently running and you want to let it continue without interfering, return Execute: 'None'.
