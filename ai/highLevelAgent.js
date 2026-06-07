@@ -60,4 +60,56 @@ Your output will be appended to the context memory so the low-level agent can re
   return response.text;
 }
 
-module.exports = { executeHighLevel };
+async function executeFlashBack(bot, query, memoryContext) {
+  const memoryPath = path.join(__dirname, '../skills/task_tree.spatial_memory.json');
+  let memoryData = "No spatial memory found.";
+  let images = [];
+  
+  if (fs.existsSync(memoryPath)) {
+    try {
+      const rawMemory = JSON.parse(fs.readFileSync(memoryPath, 'utf8'));
+      if (rawMemory.experiences && rawMemory.experiences.length > 0) {
+        const memoriesText = rawMemory.experiences.map((m, idx) => {
+           return `Memory ${idx}: [${m.topic}] Route: ${m.route}, Coordinates: ${m.coords}, ImagePath: ${m.screenshotFilename}`;
+        }).join('\n');
+        memoryData = memoriesText;
+        
+        for (const m of rawMemory.experiences) {
+          if (m.screenshotFilename && fs.existsSync(m.screenshotFilename)) {
+            const ext = path.extname(m.screenshotFilename).toLowerCase();
+            let mimeType = 'image/jpeg';
+            if (ext === '.png') mimeType = 'image/png';
+            const imgBase64 = fs.readFileSync(m.screenshotFilename, 'base64');
+            images.push({
+              inlineData: {
+                data: imgBase64,
+                mimeType: mimeType
+              }
+            });
+          }
+        }
+      }
+    } catch(e) {
+      console.error("FlashBack memory read error:", e);
+    }
+  }
+
+  const promptText = `You are MineMate (FlashBack Memory Process).
+You are called when the low-level agent needs to recall a spatial location, a route, or where things are.
+Query: "${query}"
+
+Here is the Spatial Memory Database:
+${memoryData}
+(Attached are screenshots corresponding to these memories, in case you need visual context.)
+
+Analyze the query, the spatial text, and the images. Return a detailed explanation of what is where, the route to take, and the coordinates, so the low-level agent can find it. If you cannot find relevant information, just state so.`;
+
+  const response = await ai.models.generateContent({
+    model: "gemini-3.1-pro",
+    contents: [promptText].concat(images)
+  });
+
+  return response.text;
+}
+
+module.exports = { executeHighLevel, executeFlashBack };

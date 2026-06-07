@@ -93,6 +93,42 @@
       "parameters": ["state (on, off, toggle, time)", "durationMs (optional, only used if state is time)"],
       "options": ["on", "off", "toggle", "time"],
       "codeExample": "mmskills.ai.setEmergencyMode('time', 5000);"
+    },
+    {
+      "name": "mmskills.inventory.items",
+      "description": "Returns an array of serialized item objects currently in the inventory.",
+      "parameters": [],
+      "codeExample": "const items = await mmskills.inventory.items();"
+    },
+    {
+      "name": "mmskills.inventory.unequip",
+      "description": "Unequips an item from a specific destination (e.g., 'hand', 'head', 'torso', 'legs', 'feet', 'off-hand').",
+      "parameters": ["destination"],
+      "codeExample": "await mmskills.inventory.unequip('hand');"
+    },
+    {
+      "name": "mmskills.inventory.equip",
+      "description": "Equips an item by its name (e.g. 'iron_sword') or by passing a serialized item object, to a specific destination (e.g. 'hand').",
+      "parameters": ["itemIdentifier", "destination"],
+      "codeExample": "await mmskills.inventory.equip('iron_sword', 'hand');"
+    },
+    {
+      "name": "mmskills.inventory.toss",
+      "description": "Tosses a specific item type (number ID) from the inventory. Optional metadata and count can be provided.",
+      "parameters": ["itemType", "metadata", "count"],
+      "codeExample": "await mmskills.inventory.toss(1, null, 1);"
+    },
+    {
+      "name": "mmskills.ai.saveSpatialMemory",
+      "description": "Saves spatial long-term memory (route, coordinates, and screenshot file path) so the AI can recall it later using Execute: 'FlashBack'.",
+      "parameters": ["topic", "route", "coords", "screenshotFilename"],
+      "codeExample": "mmskills.ai.saveSpatialMemory('Nether Portal', 'Walk straight from the main base for 50 blocks', '10, 64, -20', './screenshots/nether_portal.jpg');"
+    },
+    {
+      "name": "mmskills.vision.takeScreenshot",
+      "description": "Takes a high-resolution screenshot of the current view and saves it to the specified file path.",
+      "parameters": ["filepath"],
+      "codeExample": "await mmskills.vision.takeScreenshot('./screenshots/nether_portal.jpg');"
     }
   ]
 }

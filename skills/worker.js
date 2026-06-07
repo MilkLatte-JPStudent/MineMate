@@ -23,13 +23,23 @@ parentPort.on('message', async (msg) => {
           break: (...args) => callMain('mmskills', ['block', 'break'], args),
           interact: (...args) => callMain('mmskills', ['block', 'interact'], args)
         },
+        inventory: {
+          items: (...args) => callMain('mmskills', ['inventory', 'items'], args),
+          unequip: (...args) => callMain('mmskills', ['inventory', 'unequip'], args),
+          equip: (...args) => callMain('mmskills', ['inventory', 'equip'], args),
+          toss: (...args) => callMain('mmskills', ['inventory', 'toss'], args)
+        },
         entity: {
           interact: (...args) => callMain('mmskills', ['entity', 'interact'], args),
           attack: (...args) => callMain('mmskills', ['entity', 'attack'], args)
         },
         ai: {
           saveExperience: (...args) => callMain('mmskills', ['ai', 'saveExperience'], args),
+          saveSpatialMemory: (...args) => callMain('mmskills', ['ai', 'saveSpatialMemory'], args),
           setEmergencyMode: (...args) => callMain('mmskills', ['ai', 'setEmergencyMode'], args)
+        },
+        vision: {
+          takeScreenshot: (...args) => callMain('mmskills', ['vision', 'takeScreenshot'], args)
         }
       };
 

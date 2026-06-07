@@ -92,6 +92,39 @@ async function executeSkillCode(bot, codeStr, aiUtils = {}) {
         }
       }
     },
+    inventory: {
+      items: () => {
+        // Return serialized items
+        return bot.inventory.items().map(item => ({
+          type: item.type,
+          count: item.count,
+          name: item.name,
+          displayName: item.displayName,
+          slot: item.slot,
+          metadata: item.metadata
+        }));
+      },
+      unequip: async (destination) => {
+        try { await bot.unequip(destination); } catch(e) { console.log("Could not unequip:", e.message); }
+      },
+      equip: async (itemIdentifier, destination) => {
+        let itemToEquip;
+        if (typeof itemIdentifier === 'object' && itemIdentifier !== null) {
+          itemToEquip = bot.inventory.items().find(i => i.type === itemIdentifier.type || i.name === itemIdentifier.name);
+        } else if (typeof itemIdentifier === 'string' || typeof itemIdentifier === 'number') {
+          itemToEquip = bot.inventory.items().find(i => i.name === itemIdentifier || i.type === itemIdentifier);
+        }
+        
+        if (itemToEquip) {
+          try { await bot.equip(itemToEquip, destination); } catch(e) { console.log("Could not equip:", e.message); }
+        } else {
+          console.log("Could not equip: Item not found in inventory.");
+        }
+      },
+      toss: async (itemType, metadata, count) => {
+        try { await bot.toss(itemType, metadata, count); } catch(e) { console.log("Could not toss:", e.message); }
+      }
+    },
     entity: {
       interact: async () => {
         const target = typeof bot.entityAtCursor === 'function' ? bot.entityAtCursor(5) : bot.nearestEntity(e => bot.entity.position.distanceTo(e.position) < 5);
@@ -133,11 +166,34 @@ async function executeSkillCode(bot, codeStr, aiUtils = {}) {
           console.log("Could not save experience:", e.message);
         }
       },
+      saveSpatialMemory: (topic, route, coords, screenshotFilename) => {
+        try {
+          const expPath = path.join(__dirname, 'task_tree.spatial_memory.json');
+          let expData = { experiences: [] };
+          if (fs.existsSync(expPath)) {
+            expData = JSON.parse(fs.readFileSync(expPath, 'utf8'));
+          }
+          expData.experiences.push({ topic, route, coords, screenshotFilename, timestamp: new Date().toISOString() });
+          fs.writeFileSync(expPath, JSON.stringify(expData, null, 2), 'utf8');
+          console.log(`Spatial Memory saved: [${topic}]`);
+        } catch(e) {
+          console.log("Could not save spatial memory:", e.message);
+        }
+      },
       setEmergencyMode: (state, durationMs) => {
         if (aiUtils.setEmergencyMode) {
           aiUtils.setEmergencyMode(state, durationMs);
         } else {
           console.log("setEmergencyMode is not available in this context.");
+        }
+      }
+    },
+    vision: {
+      takeScreenshot: async (filepath) => {
+        if (aiUtils.captureSession && aiUtils.captureSession.takeHighResScreenshot) {
+          try { await aiUtils.captureSession.takeHighResScreenshot(filepath); } catch(e) { console.log("Screenshot error:", e.message); }
+        } else {
+          console.log("takeScreenshot is not available in this context.");
         }
       }
     }

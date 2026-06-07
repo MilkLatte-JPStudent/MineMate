@@ -39,6 +39,11 @@ async function startCapture(url) {
       frames = [];
       return currentFrames;
     },
+    takeHighResScreenshot: async (filepath) => {
+      if (!page.isClosed()) {
+        await page.screenshot({ path: filepath, type: 'jpeg', quality: 90 });
+      }
+    },
     stop: async () => {
       clearInterval(captureInterval);
       await browser.close();

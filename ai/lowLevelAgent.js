@@ -1,5 +1,7 @@
+const fs = require('fs');
+const path = require('path');
 const { GoogleGenAI } = require('@google/genai');
-const { executeHighLevel } = require('./highLevelAgent');
+const { executeHighLevel, executeFlashBack } = require('./highLevelAgent');
 const { executeSkillCode } = require('../skills/executor');
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
@@ -8,7 +10,23 @@ const RESPONSE_SCHEMA = {
   type: "object",
   properties: {
     Chat: { type: "string" },
-    Execute: { type: "string", enum: ["Start", "Stop", "Thinking", "None"] },
+    Thought: { type: "string", description: "Internal notes, observations, or thoughts about what you did, heard, or saw." },
+    Execute: { type: "string", enum: ["Start", "Stop", "Thinking", "FlashBack", "LongMemory", "None"] },
+    Query: { type: "string", description: "Required if Execute is FlashBack. What to recall." },
+    Action: {
+      type: "object",
+      description: "Required if Execute is LongMemory.",
+      properties: {
+        Write: {
+          type: "object",
+          properties: {
+            Title: { type: "string" },
+            Contents: { type: "string" }
+          }
+        },
+        Query: { type: "string" }
+      }
+    },
     Code: { type: "string", description: "Included only if Execute is Start. Newlines must be encoded as \\n" },
     EmergencyMode: {
       type: "object",
@@ -29,6 +47,18 @@ let isScriptRunning = false;
 let previousHealth = 20;
 let manualEmergencyMode = false;
 let emergencyTimeout = null;
+
+function cosineSimilarity(vecA, vecB) {
+  let dotProduct = 0;
+  let normA = 0;
+  let normB = 0;
+  for (let i = 0; i < vecA.length; i++) {
+    dotProduct += vecA[i] * vecB[i];
+    normA += vecA[i] * vecA[i];
+    normB += vecB[i] * vecB[i];
+  }
+  return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+}
 
 function setEmergencyMode(state, durationMs) {
   if (state === 'on') {
@@ -73,6 +103,9 @@ async function callLowLevelGemini(bot, frames) {
   const promptText = `You are MineMate, a Minecraft AI bot. You must respond in JSON matching the schema.
 If you have enough information to act, return Execute: 'Start' and write a complete, autonomous JavaScript script in 'Code'. You can use standard JS (loops, variables, conditionals) combined with 'mmskills' and 'botAPI' (for direct bot access like chat or control states) to assemble a full processing sequence.
 If you need to think deeply, plan, or use a skill tree/Google Search, return Execute: 'Thinking'.
+If you need to recall a spatial memory (a saved location, route, or coordinate) with screenshots using high-level AI, return Execute: 'FlashBack' and set 'Query' to what you want to recall.
+If you want to save a screenshot and memory for yourself, return Execute: 'LongMemory' with Action: {Write: {Title: '...', Contents: '...'}}.
+If you want to search your LongMemory database, return Execute: 'LongMemory' with Action: {Query: '...'}.
 If you need to stop current actions, return Execute: 'Stop'.
 If a script is currently running and you want to let it continue without interfering, return Execute: 'None'.
 Current State: ${stateStr}
@@ -122,6 +155,10 @@ async function startAgentLoop(bot, captureSession) {
         memoryContext.push(`Bot said: ${response.Chat}`);
       }
 
+      if (response.Thought) {
+        memoryContext.push(`AI Thought: ${response.Thought}`);
+      }
+
       if (response.EmergencyMode) {
         setEmergencyMode(response.EmergencyMode.state, response.EmergencyMode.durationMs);
         memoryContext.push(`Set emergency mode to ${response.EmergencyMode.state}`);
@@ -131,11 +168,66 @@ async function startAgentLoop(bot, captureSession) {
         console.log("Delegating to High-Level Agent...");
         const highLevelPlan = await executeHighLevel(bot, memoryContext);
         memoryContext.push(`High level thought: ${highLevelPlan}`);
+      } else if (response.Execute === "FlashBack") {
+        console.log("FlashBack Triggered...");
+        const flashbackRecall = await executeFlashBack(bot, response.Query || "Recall requested", memoryContext);
+        memoryContext.push(`FlashBack memory recall: ${flashbackRecall}`);
+      } else if (response.Execute === "LongMemory" && response.Action) {
+        if (response.Action.Write) {
+          const title = response.Action.Write.Title;
+          const contents = response.Action.Write.Contents;
+          
+          const ts = Date.now();
+          const screenshotsDir = path.join(__dirname, '../screenshots');
+          if (!fs.existsSync(screenshotsDir)) fs.mkdirSync(screenshotsDir, { recursive: true });
+          const screenshotPath = path.join(screenshotsDir, `long_memory_${ts}.jpg`);
+          await captureSession.takeHighResScreenshot(screenshotPath);
+          
+          const embedRes = await ai.models.embedContent({
+            model: 'text-embedding-004',
+            contents: title
+          });
+          const embedding = embedRes.embeddings[0].values;
+          
+          const memoryPath = path.join(__dirname, '../skills/LongMemory.json');
+          let memories = [];
+          if (fs.existsSync(memoryPath)) memories = JSON.parse(fs.readFileSync(memoryPath, 'utf8'));
+          memories.push({ title, contents, screenshotPath, embedding, timestamp: new Date().toISOString() });
+          fs.writeFileSync(memoryPath, JSON.stringify(memories), 'utf8');
+          
+          memoryContext.push(`Saved LongMemory: [${title}]`);
+        } else if (response.Action.Query) {
+          const query = response.Action.Query;
+          const embedRes = await ai.models.embedContent({
+            model: 'text-embedding-004',
+            contents: query
+          });
+          const queryEmb = embedRes.embeddings[0].values;
+          
+          const memoryPath = path.join(__dirname, '../skills/LongMemory.json');
+          let memories = [];
+          if (fs.existsSync(memoryPath)) memories = JSON.parse(fs.readFileSync(memoryPath, 'utf8'));
+          
+          if (memories.length > 0) {
+            for (const m of memories) {
+              m.score = cosineSimilarity(queryEmb, m.embedding);
+            }
+            memories.sort((a, b) => b.score - a.score);
+            const best = memories[0];
+            if (best.score > 0.5) {
+              memoryContext.push(`Recalled LongMemory [Similarity: ${best.score.toFixed(2)}]: Title: ${best.title}, Contents: ${best.contents}, Screenshot path: ${best.screenshotPath}`);
+            } else {
+              memoryContext.push(`No relevant LongMemory found for query: ${query}`);
+            }
+          } else {
+            memoryContext.push(`LongMemory database is empty.`);
+          }
+        }
       } else if (response.Execute === "Start" && response.Code) {
         console.log("Executing code...");
         isScriptRunning = true;
         memoryContext.push(`Started executing new code.`);
-        executeSkillCode(bot, response.Code, { setEmergencyMode }).catch(err => {
+        executeSkillCode(bot, response.Code, { setEmergencyMode, captureSession }).catch(err => {
           console.error("Script Error:", err.message);
           memoryContext.push(`Script Error: ${err.message}`);
         }).finally(() => {
