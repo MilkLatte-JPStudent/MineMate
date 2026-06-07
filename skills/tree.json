@@ -1,0 +1,98 @@
+{
+  "skills": [
+    {
+      "name": "walkForward",
+      "description": "Walks forward for a specific duration.",
+      "parameters": ["durationMs"],
+      "codeExample": "bot.setControlState('forward', true);\nawait new Promise(r => setTimeout(r, durationMs));\nbot.setControlState('forward', false);"
+    },
+    {
+      "name": "sayHello",
+      "description": "Says hello in chat.",
+      "parameters": [],
+      "codeExample": "bot.chat('Hello world!');"
+    },
+    {
+      "name": "lookAt",
+      "description": "Looks at specific coordinates.",
+      "parameters": ["x", "y", "z"],
+      "codeExample": "const vec3 = require('vec3');\nbot.lookAt(vec3(x, y, z));"
+    },
+    {
+      "name": "mmskills.move.walk",
+      "description": "Walks continuously in the specified direction. If distance is provided, stops automatically after traveling that many blocks or getting stuck.",
+      "parameters": ["direction", "distanceInBlocks (optional)"],
+      "options": ["right", "left", "forward", "back"],
+      "codeExample": "await mmskills.move.walk('forward', 5);"
+    },
+    {
+      "name": "mmskills.move.run",
+      "description": "Sprints continuously in the specified direction. If distance is provided, stops automatically after traveling that many blocks or getting stuck.",
+      "parameters": ["direction", "distanceInBlocks (optional)"],
+      "options": ["right", "left", "forward", "back"],
+      "codeExample": "await mmskills.move.run('forward', 10);"
+    },
+    {
+      "name": "mmskills.move.lookat",
+      "description": "Changes the bot's camera viewing angle to the specified pitch and yaw.",
+      "parameters": ["pitch", "yaw"],
+      "codeExample": "await mmskills.move.lookat(0, Math.PI);"
+    },
+    {
+      "name": "mmskills.move.jump",
+      "description": "Makes the bot jump once.",
+      "parameters": [],
+      "codeExample": "mmskills.move.jump();"
+    },
+    {
+      "name": "mmskills.move.sneak",
+      "description": "Changes the sneaking (crouching) state of the bot.",
+      "parameters": ["state"],
+      "options": ["on", "off", "toggle"],
+      "codeExample": "mmskills.move.sneak('on');"
+    },
+    {
+      "name": "mmskills.block.place",
+      "description": "Equips the specified block from inventory and places it on the face of the block the bot is currently looking at. Will fail if block is not in inventory or bot is not looking at an adjacent block.",
+      "parameters": ["blockID"],
+      "codeExample": "await mmskills.block.place('dirt');"
+    },
+    {
+      "name": "mmskills.block.break",
+      "description": "Breaks the block the bot is currently looking at. Does not require coordinates because it targets the cursor block. This is an asynchronous task.",
+      "parameters": [],
+      "codeExample": "await mmskills.block.break();"
+    },
+    {
+      "name": "mmskills.block.interact",
+      "description": "Interacts with (e.g. right-clicks) the block the bot is currently looking at (like a door, button, or chest).",
+      "parameters": [],
+      "codeExample": "await mmskills.block.interact();"
+    },
+    {
+      "name": "mmskills.entity.interact",
+      "description": "Interacts with the nearest entity within 5 blocks that the bot is looking at.",
+      "parameters": [],
+      "codeExample": "await mmskills.entity.interact();"
+    },
+    {
+      "name": "mmskills.entity.attack",
+      "description": "Attacks the nearest entity (mob, player, or animal) within 5 blocks that the bot is looking at.",
+      "parameters": [],
+      "codeExample": "await mmskills.entity.attack();"
+    },
+    {
+      "name": "mmskills.ai.saveExperience",
+      "description": "Saves a successful strategy or learning experience to the AI's permanent memory. Use this after completing a complex task successfully to remember how to do it in the future.",
+      "parameters": ["topic", "details"],
+      "codeExample": "mmskills.ai.saveExperience('How to craft a boat', 'I needed 5 wooden planks. I opened the crafting table and placed them in a U shape.');"
+    },
+    {
+      "name": "mmskills.ai.setEmergencyMode",
+      "description": "Manually triggers or stops emergency mode (0.2s ultra-fast visual polling). Extremely useful when doing parkour, intense combat, or tasks requiring split-second decisions.",
+      "parameters": ["state (on, off, toggle, time)", "durationMs (optional, only used if state is time)"],
+      "options": ["on", "off", "toggle", "time"],
+      "codeExample": "mmskills.ai.setEmergencyMode('time', 5000);"
+    }
+  ]
+}

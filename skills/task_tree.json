@@ -1,0 +1,132 @@
+{
+  "Categories": {
+    "サバイバル全般 (General Survival)": {
+      "Early Game": [
+        "Collect 16 Wood Logs",
+        "Craft Crafting Table and Wooden Pickaxe",
+        "Mine 3 Cobblestone and upgrade to Stone Pickaxe",
+        "Gather Coal and Iron Ore",
+        "Craft a Furnace and smelt Iron",
+        "Build a simple 5x5 shelter",
+        "Craft a Bed using 3 Wool and 3 Planks"
+      ],
+      "Mid Game": [
+        "Set up an automated or manual wheat/cow farm",
+        "Mine Diamonds at Y-level -58",
+        "Craft Diamond Pickaxe and Obsidian for Nether Portal",
+        "Explore the Nether to find a Fortress",
+        "Gather Blaze Rods and Nether Wart",
+        "Brew basic Potions (Fire Resistance, Healing)",
+        "Cure a Zombie Villager and set up a Trading Hall"
+      ],
+      "Late Game": [
+        "Locate the Stronghold using Eyes of Ender",
+        "Defeat the Ender Dragon",
+        "Explore End Cities to acquire Elytra and Shulker Boxes",
+        "Spawn and defeat the Wither",
+        "Craft a Beacon",
+        "Build large-scale automated item sorting systems and mega bases"
+      ]
+    },
+    "クリエイティブ全般 (General Creative)": {
+      "Planning": [
+        "Select a color palette and block textures",
+        "Outline the foundational footprint of the structure",
+        "Determine the scale and proportion of the build"
+      ],
+      "Execution": [
+        "Use WorldEdit or fill commands to clear large areas",
+        "Construct the main structural pillars and framework",
+        "Detail walls with depth, stairs, and slabs",
+        "Design intricate roofs and overhangs"
+      ],
+      "Terraforming": [
+        "Smooth natural terrain using commands or hand placement",
+        "Build custom organic trees, rivers, and mountains"
+      ]
+    },
+    "建築全般 (General Building)": {
+      "Styles": {
+        "Medieval": ["Use Stone Bricks, Spruce Wood, and Cobblestone", "Build steep A-frame roofs", "Add chimneys and narrow windows"],
+        "Modern": ["Use White Concrete, Glass Panes, and Quartz", "Focus on cubic, asymmetric geometry", "Incorporate open floor plans and pools"],
+        "Organic": ["Build custom trees with varied leaf types", "Construct terraformed cliffs using stone and moss", "Add waterfalls and custom ponds"]
+      },
+      "Interior Design": [
+        "Light up rooms using hidden lighting (glowstone under carpets)",
+        "Build functional-looking furniture (stairs for chairs, signs for armrests)",
+        "Add item frames, flower pots, and paintings for detail"
+      ]
+    },
+    "PVE (Player vs Environment)": {
+      "Basic Combat": [
+        "Master sweep attacks for crowd control",
+        "Time shield blocks against Skeleton arrows and Creeper explosions",
+        "Use critical hits (attacking while falling) for maximum damage"
+      ],
+      "Boss Battles": {
+        "Ender Dragon": ["Destroy End Crystals using bow", "Wait for dragon to perch, then attack head with sword/beds"],
+        "Wither": ["Spawn in a confined underground area", "Use Smite V sword and Golden Apples", "Dodge wither skulls to avoid Wither effect"],
+        "Warden": ["Avoid triggering shrieker sensors", "Use wool to muffle footsteps", "Use ranged weapons from high ground if engaged"]
+      },
+      "Raids & Structures": [
+        "Conquer Woodland Mansions by taking out Evokers first",
+        "Clear Ocean Monuments using Water Breathing and depth strider",
+        "Defend villages from Pillager Raids to get Hero of the Village"
+      ]
+    },
+    "PVP (Player vs Player)": {
+      "Mechanics": [
+        "Master sprint-resetting (W-tapping) to deal maximum knockback",
+        "Practice strafing to dodge opponent tracking",
+        "Perfect rod-tricking or snowball throwing to disrupt enemy movement"
+      ],
+      "Inventory Management": [
+        "Keep Hotbar organized: Sword, Bow, Food, Blocks, Potions",
+        "Quickly swap to shield or totem of undying",
+        "Use hotkeys instead of scroll wheel for instant selection"
+      ],
+      "Game Modes": [
+        "Bedwars: Quick bridging, resource management, bed defense",
+        "Skywars: Chest looting speed, situational awareness, knockback tactics",
+        "UHC: Fast resource gathering, golden apple crafting, cautious engagement"
+      ]
+    },
+    "RTA限定 (Speedrun)": {
+      "World Generation & Spawn": [
+        "Analyze pie-chart to detect nearby structures (Villages, Bastions)",
+        "Gather essential wood, beds, and food within 2 minutes",
+        "Locate a lava pool or Ruined Portal"
+      ],
+      "The Nether": [
+        "Construct a Nether Portal using a bucket and lava pool (Speed portal)",
+        "Find a Bastion Remnant and execute a Piglin bartering route (trading gold for pearls/string)",
+        "Find a Nether Fortress to farm 6-7 Blaze Rods",
+        "Blind Travel (Calculate Overworld Stronghold coordinates from the Nether)"
+      ],
+      "The End": [
+        "Triangulate the Stronghold using 2 Ender Eye throws",
+        "Navigate the Stronghold efficiently to find the Portal Room",
+        "Execute 'One Cycle' on the Ender Dragon using 4-5 Beds exploding at the head when perching"
+      ]
+    },
+    "レッドストーン (Redstone)": {
+      "Basic Components": [
+        "Understand Redstone Dust power decay (15 blocks limit)",
+        "Use Repeaters for signal delay and extending power",
+        "Use Comparators for reading inventory states and logic subtraction",
+        "Use Observers to detect block updates"
+      ],
+      "Logic Gates & Clocks": [
+        "Build AND, OR, XOR gates",
+        "Construct simple Hopper clocks and Observer clocks for repeating signals",
+        "Build T-Flip Flops to convert button pulses to lever states"
+      ],
+      "Farms & Contraptions": [
+        "Build auto-smelters and item sorters using hoppers and comparators",
+        "Design zero-tick or flying machine based sugarcane/bamboo farms",
+        "Create hidden piston doors (2x2, 3x3 vault doors)",
+        "Construct fully automated Iron Golem farms using scared villagers"
+      ]
+    }
+  }
+}
