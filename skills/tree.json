@@ -119,6 +119,42 @@
       "codeExample": "await mmskills.inventory.toss(1, null, 1);"
     },
     {
+      "name": "mmskills.inventory.craft",
+      "description": "Crafts an item using a 2x2 (inventory) or 3x3 (crafting table) grid. Throws an error if failed. For 3x3, the bot MUST be looking at a crafting_table.",
+      "parameters": ["gridType ('2x2' or '3x3')", "targetItemIdentifier (string name, id, or item object)"],
+      "codeExample": "try { await mmskills.inventory.craft('3x3', 'wooden_pickaxe'); } catch(e) { console.log(e.message); }"
+    },
+    {
+      "name": "mmskills.inventory.isOpenUI",
+      "description": "Checks if a chest/crafting UI was just opened (returns true for 0.08 seconds after opening).",
+      "parameters": [],
+      "codeExample": "const justOpened = mmskills.inventory.isOpenUI();"
+    },
+    {
+      "name": "mmskills.window.current",
+      "description": "Returns the currently opened UI window object (or null if none). Contains id, type, title, and slots array.",
+      "parameters": [],
+      "codeExample": "const win = await mmskills.window.current();"
+    },
+    {
+      "name": "mmskills.window.leftClick",
+      "description": "Left clicks a specific slot in the currently opened window.",
+      "parameters": ["slotId"],
+      "codeExample": "await mmskills.window.leftClick(36);"
+    },
+    {
+      "name": "mmskills.window.rightClick",
+      "description": "Right clicks a specific slot in the currently opened window.",
+      "parameters": ["slotId"],
+      "codeExample": "await mmskills.window.rightClick(36);"
+    },
+    {
+      "name": "mmskills.window.shiftClick",
+      "description": "Shift clicks a specific slot in the currently opened window to move items quickly.",
+      "parameters": ["slotId"],
+      "codeExample": "await mmskills.window.shiftClick(36);"
+    },
+    {
       "name": "mmskills.ai.saveSpatialMemory",
       "description": "Saves spatial long-term memory (route, coordinates, and screenshot file path) so the AI can recall it later using Execute: 'FlashBack'.",
       "parameters": ["topic", "route", "coords", "screenshotFilename"],

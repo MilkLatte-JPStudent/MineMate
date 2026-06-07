@@ -71,6 +71,7 @@ MineMateは、Minecraftの世界を自律的に認識・判断・行動するAI�
 * **仕様:**
   * **メモリ制限:** `resourceLimits: { maxOldGenerationSizeMb: 50 }` のように厳しいメモリ制限がかけられており、AIが無限ループや巨大な配列を生成してメモリを枯渇させても、メインプロセスは死なずこのWorkerだけがクラッシュします（OOMエラーはAIにフィードバックされます）。
   * **IPCプロキシAPI:** Worker内には `mmskills` や `botAPI` といったプロキシオブジェクトが用意されており、これらを呼び出すと内部で `parentPort.postMessage` に変換され、メインスレッドの `executor.js` に処理を依頼します。
+  * **操作の多様性:** 移動やブロック破壊に加え、**クラフト操作 (`mmskills.inventory.craft`)** や、**チェスト等のUIウィンドウ操作 (`mmskills.window.leftClick` 等)** も完全にプロキシ経由でサポートされています。
 
 ### `skills/validator.js`
 * **役割:** AI生成コードの静的解析（ASTチェック）。

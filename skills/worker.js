@@ -27,7 +27,15 @@ parentPort.on('message', async (msg) => {
           items: (...args) => callMain('mmskills', ['inventory', 'items'], args),
           unequip: (...args) => callMain('mmskills', ['inventory', 'unequip'], args),
           equip: (...args) => callMain('mmskills', ['inventory', 'equip'], args),
-          toss: (...args) => callMain('mmskills', ['inventory', 'toss'], args)
+          toss: (...args) => callMain('mmskills', ['inventory', 'toss'], args),
+          craft: (...args) => callMain('mmskills', ['inventory', 'craft'], args),
+          isOpenUI: (...args) => callMain('mmskills', ['inventory', 'isOpenUI'], args)
+        },
+        window: {
+          current: (...args) => callMain('mmskills', ['window', 'current'], args),
+          leftClick: (...args) => callMain('mmskills', ['window', 'leftClick'], args),
+          rightClick: (...args) => callMain('mmskills', ['window', 'rightClick'], args),
+          shiftClick: (...args) => callMain('mmskills', ['window', 'shiftClick'], args)
         },
         entity: {
           interact: (...args) => callMain('mmskills', ['entity', 'interact'], args),

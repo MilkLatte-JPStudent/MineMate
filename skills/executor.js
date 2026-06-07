@@ -2,7 +2,19 @@ const fs = require('fs');
 const path = require('path');
 const { Worker } = require('worker_threads');
 
+let isUIOpenState = false;
+
 async function executeSkillCode(bot, codeStr, aiUtils = {}) {
+  if (!bot._uiStateListenerAttached) {
+    bot._uiStateListenerAttached = true;
+    bot.on('windowOpen', (window) => {
+      isUIOpenState = true;
+      setTimeout(() => {
+        isUIOpenState = false;
+      }, 80);
+    });
+  }
+
   const actualCode = codeStr.replace(/\\n/g, '\n');
   
   const mmskills = {
@@ -123,6 +135,74 @@ async function executeSkillCode(bot, codeStr, aiUtils = {}) {
       },
       toss: async (itemType, metadata, count) => {
         try { await bot.toss(itemType, metadata, count); } catch(e) { console.log("Could not toss:", e.message); }
+      },
+      craft: async (gridType, targetItemIdentifier) => {
+        try {
+          let targetItemType;
+          if (typeof targetItemIdentifier === 'object' && targetItemIdentifier !== null) {
+            targetItemType = targetItemIdentifier.type;
+          } else if (typeof targetItemIdentifier === 'string') {
+            const item = bot.registry.itemsByName[targetItemIdentifier];
+            if (!item) throw new Error(`Item ${targetItemIdentifier} not found in registry`);
+            targetItemType = item.id;
+          } else {
+            targetItemType = targetItemIdentifier;
+          }
+
+          let craftingTable = null;
+          if (gridType === '3x3') {
+            craftingTable = bot.blockAtCursor(5);
+            if (!craftingTable || craftingTable.name !== 'crafting_table') {
+              throw new Error("You must be looking at a crafting_table to use 3x3 grid.");
+            }
+          }
+
+          const recipes = bot.recipesFor(targetItemType, null, 1, craftingTable);
+          if (recipes.length === 0) {
+            throw new Error(`No recipes found for item ID ${targetItemType}. Maybe missing ingredients or no crafting table?`);
+          }
+
+          await bot.craft(recipes[0], 1, craftingTable);
+          console.log(`Successfully crafted item ID ${targetItemType}`);
+        } catch(e) {
+          console.log("Could not craft:", e.message);
+          throw e;
+        }
+      },
+      isOpenUI: () => {
+        return isUIOpenState;
+      }
+    },
+    window: {
+      current: () => {
+        if (!bot.currentWindow) return null;
+        return {
+          id: bot.currentWindow.id,
+          type: bot.currentWindow.type,
+          title: bot.currentWindow.title,
+          slots: bot.currentWindow.slots.map(s => s ? { type: s.type, count: s.count, name: s.name, slot: s.slot } : null)
+        };
+      },
+      leftClick: async (slotId) => {
+        if (bot.currentWindow) {
+          try { await bot.clickWindow(slotId, 0, 0); } catch(e) { console.log("leftClick err:", e.message); throw e; }
+        } else {
+          throw new Error("No UI is currently open");
+        }
+      },
+      rightClick: async (slotId) => {
+        if (bot.currentWindow) {
+          try { await bot.clickWindow(slotId, 1, 0); } catch(e) { console.log("rightClick err:", e.message); throw e; }
+        } else {
+          throw new Error("No UI is currently open");
+        }
+      },
+      shiftClick: async (slotId) => {
+        if (bot.currentWindow) {
+          try { await bot.clickWindow(slotId, 0, 1); } catch(e) { console.log("shiftClick err:", e.message); throw e; }
+        } else {
+          throw new Error("No UI is currently open");
+        }
       }
     },
     entity: {
